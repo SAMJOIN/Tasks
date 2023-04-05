@@ -1,0 +1,357 @@
+package com.company;
+
+import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Locale;
+import java.lang.Object;
+
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("Шифратор: " + encrypt("Hello"));
+        System.out.println("Дешифратор: " + decrypt(new int[]{72, 33, -73, 84, -12, -3, 13, -13, -68}));
+        System.out.println("Фигура может пойти из начальной позиции в конечную?: " + canMove("King", "A1", "c3"));
+        System.out.println("Слово можно восстановить?: " + canComplete("butl", "beautiful"));
+        System.out.println("Произведение цифр, когда длина равна 1: " + sumDigProd(new int[]{20, 16}));
+        System.out.println("Слова с набором гласных как у первого слова: " + sameVowelGroup(new String[]{"toe", "ocelot", "maniac"}));
+        System.out.println("Card is valid? " + validateCard("1234567890123452"));
+        System.out.println("Буквенная запись числа: " + numToEnd(999));
+        System.out.println("Хэш-код: "+ getSha256Hash("password123"));
+        System.out.println("Правильное название: " + correctTitle("TYRION LANNISTER, HAND OF THE QUEEN."));
+        System.out.println(hexLattice(8));
+        hexLattice(8);
+    }
+
+    // Задание 1
+    public static String encrypt(String s) {
+        int[] code = new int[s.length()];
+        code[0] = s.charAt(0);
+        for (int i = 1; i < s.length(); i++) {
+            code[i] = s.charAt(i) - s.charAt(i - 1);
+        }
+        return Arrays.toString(code);
+    }
+
+    public static String decrypt(int[] code) {
+        String decode = "";
+        char firstSymbol = (char) code[0];
+        decode += firstSymbol;
+        for (int i = 1; i < code.length; i++) {
+            int str = decode.charAt(i - 1) + code[i];
+            char add = (char) str;
+            decode += add;
+        }
+        return decode;
+    }
+
+    //Задание 2
+    public static boolean canMove(String figure, String startPos, String endPos) {
+        String[] start = startPos.split("");
+        String[] end = endPos.split("");
+        String startLetter = start[0];
+        String endLetter = end[0];
+        char startChar = startLetter.charAt(0);
+        char endChar = endLetter.charAt(0);
+        int startNum = Integer.parseInt(start[1]);
+        int endNum = Integer.parseInt(end[1]);
+        boolean x = false;
+
+        // Проверка на то, что данные клетки есть на поле
+        if (startNum > 0 && endNum < 9 && startLetter.matches("[A,B,C,D,E,F,G,H]") && endLetter.matches("[A,B,C,D,E,F,G,H]")) {
+
+            // Правила для пешки
+            if (figure.equals("Pawn")) {
+                if (startLetter.equals(endLetter) && (startNum + 1 == endNum || startNum - 1 == endNum))
+                    x = true;
+            }
+
+            // Правила для коня
+            if (figure.equals("Horse")) {
+                if (((startNum + 2 == endNum || startNum - 2 == endNum) && (startChar - endChar == 1 || startChar - endChar == -1)) ||
+                        ((startNum + 1 == endNum || startNum - 1 == endNum) && (startChar - endChar == 2 || startChar - endChar == -2)))
+                    x = true;
+            }
+
+            // Правила для слона
+            if (figure.equals("Bishop")) {
+                if (Math.abs(startNum - endNum) == Math.abs(startChar - endChar))
+                    x = true;
+            }
+
+            // Правила для ладьи
+            if (figure.equals("Rook")) {
+                if (startChar == endChar ^ startNum == endNum)
+                    x = true;
+            }
+
+            //Правила для ферзя
+            if (figure.equals("Queen")) {
+                if (startChar == endChar ^ startNum == endNum ^ Math.abs(startNum - endNum) == Math.abs(startChar - endChar))
+                    x = true;
+            }
+
+            //Правила для короля
+            if (figure.equals("King")) {
+                if (Math.abs(startNum - endNum) == 1 || Math.abs(startChar - endChar) == 1) {
+                    x = true;
+                }
+            }
+        }
+        return x;
+    }
+
+    //Задание 3
+    public static boolean canComplete(String word, String str) {
+        boolean x = false;
+        int count = 0;
+        int[] index = new int[word.length()];
+        // Заполняем массив index, в который входит индекс вхождения буквы из слова, которое пытаемся восстановить
+        for (int i = 0; i < word.length(); i++) {
+            String s = String.valueOf(word.charAt(i));
+            index[i] = str.indexOf(s);
+        }
+        boolean y = true;
+        // Проверка на то, что буквы идут друг за другом
+        for (int i = 1; i < word.length(); i++) {
+            if (index[i] <= index[i - 1])
+                y = false;
+        }
+        if (y)
+            x = true;
+        return x;
+    }
+
+    //Задание 4
+    public static int sumDigProd(int[] num) {
+        int l = num.length;
+        int sum = 0;
+        int proizv = 1;
+        for (int i = 0; i < l; i++)
+            sum += num[i];
+        String s = Integer.toString(sum);
+        if (sum > 9) {
+            while (l > 1) {
+                String[] mnozhiteli = s.split("");
+                proizv = 1;
+                for (int i = 0; i < mnozhiteli.length; i++) {
+                    //System.out.println(mnozhiteli.length);
+                    proizv = proizv * Integer.parseInt(mnozhiteli[i]);
+                    // System.out.println(proizv);
+                    s = Integer.toString(proizv);
+                    l = s.length();
+                }
+                // System.out.println(s);
+            }
+        } else {
+            System.out.print("Сумма цифр меньше 10, произведение равно ");
+            proizv = 0;
+        }
+
+        return proizv;
+    }
+
+    // Задание 5
+    public static String sameVowelGroup(String[] words) {
+
+        String[] firstWord = words[0].split("");
+        String regexLetter = "";
+        String print = "";
+
+        //Перебор букв в слове
+        for (int i = 0; i < firstWord.length; i++) {
+            boolean y = false;
+            y = regexLetter.matches(String.valueOf(firstWord[i]));
+            // Проверка на то, что буква гласная
+            if (firstWord[i].matches("[E,e,Y,y,U,u,I,i,O,o,A,a]") && !y)
+                regexLetter += firstWord[i];
+        }
+
+        // Добавление глассных в массим
+        String[] regex = regexLetter.split("");
+
+        // Перебор слов
+        for (int i = 0; i < words.length; i++) {
+            boolean x = true;
+            String word = words[i];
+            // Перебор гласных
+            for (int j = 0; j < regex.length; j++) {
+                // Проверка на то, что буква есть в слове
+                if (word.indexOf(regex[j]) < 0)
+                    x = false;
+            }
+            if (x)
+                print += word + " ";
+        }
+
+        String[] printArr = print.split(" ");
+
+        return Arrays.toString(printArr);
+    }
+
+    // Задание 6
+    public static boolean validateCard(String num) {
+        int controlNum = 0;
+        String step1 = "";
+        String reverse = "";
+        int x2 = 0;
+        int sum = 0;
+        boolean x = false;
+
+        if (num.length() > 13 && num.length() < 20) {
+            controlNum = Integer.parseInt(String.valueOf(num.charAt(num.length() - 1)));
+            step1 = num.substring(0, num.length() - 1);
+
+            // Переворачиваем число
+            for (int i = num.length() - 1; i > 0; i--)
+                reverse += step1.charAt(i - 1);
+
+            // Умножаем цифры на нечётных позициях на 2 и складываем все цифры
+            for (int i = 0; i < reverse.length(); i++) {
+                if (i % 2 + 1 == 1) {
+                    x2 = Integer.parseInt(String.valueOf(reverse.charAt(i))) * 2;
+                    if (x2 > 9)
+                        x2 = x2 % 10 + x2 / 10;
+                } else
+                    x2 = Integer.parseInt(String.valueOf(reverse.charAt(i)));
+                sum += x2;
+            }
+
+            if (10 - sum % 10 == controlNum)
+                x = true;
+
+        } else
+            System.out.print("Длина номера карты не соответствует требованию. ");
+        return x;
+    }
+
+    // Задание 7
+    public static String numToEnd(int a) {
+        String[] numLetter = new String[]{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"};
+        String[] decade = new String[]{"", "", "twen", "thir", "four", "fif", "six", "seven", "eigh", "nine"};
+        String[] edin = new String[]{"ноль", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять", "десять", "одинадцать", "двенадцать"};
+        String[] des = new String[]{"", "", "", "три", "четыр", "пят", "шест", "сем", "восем", "девят"};
+        String str = "";
+        String strRus = "";
+
+        if (a > -1 && a < 13) {
+            str = numLetter[a];
+            strRus = edin[a];
+        }
+
+        if (a > 12 && a < 20) {
+            str = decade[a % 10] + "teen";
+            strRus = des[a % 10] + "надцать";
+        }
+
+        if (a > 19 && a < 100) {
+            str = decade[a / 10] + "ty";
+            if (a / 10 == 2 || a / 10 == 3)
+                strRus = edin[a / 10] + "дцать";
+            if (a / 10 == 4)
+                strRus = "сорок";
+            if (a / 10 > 4 && a / 10 < 9)
+                strRus = edin[a / 10] + "десят";
+            if (a / 10 == 9)
+                strRus = "девяносто";
+            if (a % 10 != 0) {
+                str += " " + numLetter[a % 10];
+                strRus += " " + edin[a % 10];
+            }
+
+        }
+
+        if (a > 99 && a < 1000) {
+            str = numLetter[a / 100] + " " + "nundred";
+            if (a / 100 == 1)
+                strRus = "сто";
+            if (a / 100 == 2)
+                strRus = "двести";
+            if (a / 100 == 4 || a / 100 == 3)
+                strRus = edin[a / 100] + "ста";
+            if (a / 100 > 4 && a / 100 < 10)
+                strRus = edin[a / 100] + "cот";
+
+            if (a % 100 / 10 != 0) {
+                str += " " + decade[a % 100 / 10] + "ty";
+                if (a % 100 / 10 == 2 || a % 100 / 10 == 3)
+                    strRus += " " + edin[a / 10] + "дцать";
+                if (a % 100 / 10 == 4)
+                    strRus += " " + "сорок";
+                if (a % 100 / 10 > 4 && a % 100 / 10 < 9)
+                    strRus += " " + edin[a / 10] + "десят";
+                if (a % 100 / 10 == 9)
+                    strRus += " " + "девяносто";
+            }
+            if (a % 10 != 0)
+                str += " " + numLetter[a % 10];
+            strRus += " " + edin[a % 10];
+        }
+        String strU = str + " " + "(" + strRus + ")";
+        return strU;
+    }
+
+    //Задание 8
+    public static String getSha256Hash(String word) {
+        try {
+            //создание экземпляра типа "дайджест", где getInstance()-указывает на метод шифрования. Дайджест - хеш-сумма.
+        MessageDigest digest = MessageDigest.getInstance("SHA3-256");
+        // заполнения массива данных закодированными словами(символами входного word). UTF-8 - кодировка, сжимающая данные
+        byte[] data = digest.digest(word.getBytes("UTF-8"));
+        // Строка, хранящая хэш-код
+        String hexString = "";
+        // Перебор данных
+        for (int i = 0; i < data.length; i++) {
+            // Перевод данных в 16-ричную систему
+            String hex = Integer.toHexString(0xff & data[i]);
+            if (hex.length() == 1)
+                hexString += "0";
+            hexString += hex;
+        }
+        return hexString.toString();}
+        catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+
+    }
+
+    //Задание 9
+    public static String correctTitle(String wrongTitle) {
+        wrongTitle = wrongTitle.toLowerCase(Locale.ROOT);
+        String correctWord ="";
+        String correctTit = "";
+        String [] wrongWords = wrongTitle.split(" ");
+        for (int i = 0; i < wrongWords.length; i++ ){
+            String firstLetter = String.valueOf(wrongWords[i].charAt(0));
+            String strWord = String.valueOf(wrongWords[i]);
+            correctWord = firstLetter.toUpperCase(Locale.ROOT) + strWord.substring(1,strWord.length());
+            if (wrongWords[i].equals("the") || wrongWords[i].equals("of") || wrongWords[i].equals("in"))
+                correctWord = wrongWords[i];
+            correctTit += correctWord +" ";
+        }
+    return correctTit;}
+
+    //Задание 10 - доделать на обработку ошибки
+    public static String hexLattice(int count) {
+        String output = "";
+        if (count == 1)
+            output = " o ";
+        //длина центра и основания
+        int l = 2;
+        int r = 3;
+        int sum = 7;
+        int i = 2;
+
+            while ( sum != count) {
+               l += 1;
+               r += 2;
+               sum += i * 6;
+               i += 1;
+            }
+            for (int j = l; j < r; j++){
+                System.out.println(" ".repeat(r-j)+ " o".repeat(j));
+            }
+            for (int j = r; j > l-1; j--)
+                System.out.println(" ".repeat(r-j)+ " o".repeat(j));
+
+    return output;}
+}
