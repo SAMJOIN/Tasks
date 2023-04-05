@@ -1,0 +1,297 @@
+package com.company;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
+
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("Задание 1:");
+        essay(10, 7, "hello my name is Bessie and this is my essay");
+        System.out.println("Задание 2:");
+        System.out.println(split("(())()()"));
+        System.out.println("Задание 3:");
+        System.out.println(toCamelCase("camal_case_font"));
+        System.out.println(toSnakeCase("thisRegisterMustBeLowerCase"));
+        System.out.println("Задание 4");
+        System.out.println("Заработано: " + overTime(new double[]{13.25, 15, 30, 1.5}));
+        System.out.println("Задание 5");
+        System.out.println(BMI("205 pounds", "73 inches"));
+        System.out.println("Задание 6");
+        System.out.println("Мультипликативное постоянство = " + bugger(999));
+        System.out.println("Задание 7:");
+        System.out.println(toStarShorthand("7777aaaabcc"));
+        System.out.println("Задание 8:");
+        System.out.println("Предложения рифмуются?: " + doesRhyme("You are off to the races", "a splendid places."));
+        System.out.println("Задание 9:");
+        System.out.println(trouble(451999277, 47772899));
+        System.out.println("Задание 10:");
+        System.out.println("Количество уникальных символов в книгах = " + countUniqueBooks("AZYWABBCATTTA", "A"));
+    }
+
+    //1 Задание
+    public static void essay(int n, int k, String s) {
+        boolean x = true;
+        String[] words = s.split(" ");
+        String str = null;
+        // Проверка на то, что нет слов, у которых длина больше, чем порог k
+        for (int i = 0; i < n; i++) {
+            if (words[i].length() > k)
+                x = false;
+        }
+        //проверка
+        if (x != false) {
+            // если все слова подходят под критерий
+            for (int i = 0; i < n; i++) {
+                str = words[i];
+                int space = 0;
+                //проверка на то, что в последовательности ещё есть слова, иначе будет выход за пределы массива
+                if ((i + 1) < n) {
+                    // прибавляем строки, пока они <= k //space - количество пробелов
+                    while ((str + words[i + 1]).length() - space <= k) {
+                        str = str + " " + words[i + 1];
+                        space += 1;
+                        i += 1;
+                    }
+                }
+                System.out.println(str);
+            }
+        }
+        //если слова не подходят под критерий
+        else
+            System.out.println("Есть слово длиннее k");
+    }
+
+    //2 Задание
+    public static String split(String s) {
+        int l = s.length();
+        int left = 0;
+        int right = 0;
+        int j = 0;
+        char chl = '(';
+        char chr = ')';
+        String str = "";
+        for (int i = 0; i < l; i++) {
+            if (chl == (s.charAt(i))) {
+                left += 1;
+            }
+            if (chr == (s.charAt(i))) {
+                right += 1;
+            }
+            if (right == left) {
+                j += 1;
+            }
+        }
+        right = 0;
+        left = 0;
+
+        String[] brackets = new String[j];
+        j = 0;
+        for (int i = 0; i < l; i++) {
+            if (chl == (s.charAt(i))) {
+                left += 1;
+                str += "(";
+            }
+            if (chr == (s.charAt(i))) {
+                right += 1;
+                str += ")";
+            }
+            if (right == left) {
+                brackets[j] = str;
+                j += 1;
+                str = "";
+            }
+        }
+        return Arrays.toString(brackets);
+    }
+
+    //3 Задание
+    public static String toCamelCase(String s) {
+        String[] str1 = s.split("_");
+        String str = str1[0];
+        int l = str1.length;
+        String[] up = new String[l - 1];
+        for (int i = 1; i < l; i++) {
+            up[i - 1] = String.valueOf(str1[i].charAt(0));
+            str += up[i - 1].toUpperCase(Locale.ROOT) + str1[i].substring(1);
+        }
+        return str;
+    }
+
+    public static String toSnakeCase(String s) {
+        int l = s.length();
+        String low = "";
+        String str = "";
+        for (int i = 0; i < l; i++) {
+            low = String.valueOf(s.charAt(i));
+            if (low.matches("[A-Z]"))
+                low = "_" + low.toLowerCase(Locale.ROOT);
+            str += low;
+        }
+        return str;
+    }
+
+    //4 Задание
+    public static String overTime(double[] znach) {
+        String str = "";
+        double reg = 0;
+        double over = 0;
+        if (znach[1] >= 17) {
+            reg = (17 - znach[0]);
+            over = znach[1] - 17;
+        }
+        if (znach[1] < 17)
+            reg = znach[1] - znach[0];
+        double s = reg * znach[2] + over * znach[2] * znach[3];
+        str = "$" + Double.toString(s);
+        return str;
+    }
+
+    //Задание 5
+    public static String BMI(String weight, String height) {
+        String[] winfo = weight.split(" ");
+        String[] hinfo = height.split(" ");
+        String overweight = "Overweight";
+        String normal = "Normal weight";
+        String underweight = "Underweight";
+        double w = 0;
+        double h = 0;
+        if (winfo[1].equals("pounds")) {
+            w = Double.parseDouble(winfo[0]);
+            h = Double.parseDouble(hinfo[0]);
+            w = w / 2.205;
+            h = h / 39.37;
+        }
+        if (winfo[1].equals("kilos")) {
+            w = Double.parseDouble(winfo[0]);
+            h = Double.parseDouble(hinfo[0]);
+        }
+        double str = w / (h * h);
+        String BMI = "";
+        str = Math.ceil(str * 10) / 10;
+        if (str < 18.5)
+            BMI = Double.toString(str) + " " + underweight;
+        if (25 <= str)
+            BMI = Double.toString(str) + " " + overweight;
+        else
+            BMI = Double.toString(str) + " " + normal;
+        return BMI;
+    }
+
+    //Задание 6
+    public static int bugger(int a) {
+        String str = Integer.toString(a);
+        String[] zn = str.split("");
+        int chislo = 1;
+        for (int i = 0; i < zn.length; i++)
+            chislo = chislo * Integer.parseInt(zn[i].trim());
+        int k = 1;
+        if (a < 10)
+            k = 0;
+        else {
+            while (chislo > 10) {
+                zn = Integer.toString(chislo).split("");
+                chislo = 1;
+                for (int i = 0; i < zn.length; i++)
+                    chislo = chislo * Integer.parseInt(zn[i].trim());
+                k += 1;
+            }
+        }
+        return k;
+    }
+
+    //Задание 7
+    public static String toStarShorthand(String s) {
+        String str = "";
+        int l = s.length();
+        for (int i = 0; i < l; i++) {
+            int k = 1;
+            // Если символ не предпоследний
+            if (i < l - 2) {
+                // Пока символы i и i+1 совпадают - считаем их количество
+                while (s.charAt(i) == s.charAt(i + 1)) {
+                    k += 1;
+                    i += 1;
+                    if (i == l - 1)
+                        break;
+                }
+            }
+            //Обработка последних символов
+            if (i == l - 2) {
+                if (s.charAt(i) == s.charAt(i + 1)) {
+                    k += 1;
+                    i += 1;
+                }
+            }
+            // Добавляем *, если количество символов больше 1
+            if (k > 1) {
+                str += s.charAt(i) + "*" + k;
+            }
+            //и Иначе выводим одиночный символ
+            else
+                str += s.charAt(i);
+        }
+        return str;
+    }
+
+    // Задание 8
+    public static boolean doesRhyme(String s1, String s2) {
+        String[] str1 = s1.split(" ");
+        String[] str2 = s2.split(" ");
+        int l1 = str1.length;
+        int l2 = str2.length;
+        String word1 = str1[l1 - 1];
+        String word2 = str2[l2 - 1];
+        //Удаляем все не гласные буквы в словах
+        word1 = word1.replaceAll("[^aeiouAEIOU]", "");
+        word2 = word2.replaceAll("[^aeiouAEIOU]", "");
+        //Избавляемся от регистра
+        word1 = word1.toLowerCase(Locale.ROOT);
+        word2 = word2.toLowerCase(Locale.ROOT);
+        return (word1.equals(word2));
+    }
+
+    //Задание 9
+    public static boolean trouble(int a, int b) {
+        boolean x = false;
+        String s1 = Integer.toString(a);
+        String s2 = Integer.toString(b);
+        for (int i = 0; i < 10; i++) {
+            String s3 = Integer.toString(i) + Integer.toString(i) + Integer.toString(i);
+            String s4 = Integer.toString(i) + Integer.toString(i);
+            if (s1.contains(s3) && s2.contains(s4)) {
+                x = true;
+            }
+        }
+        return x;
+    }
+
+    //Задание 10
+    public static int countUniqueBooks(String stringSequence, String bookEnd) {
+        int k = 0;
+        String bookStart = String.valueOf(stringSequence.charAt(0));
+        int l = stringSequence.length();
+        for (int i = 0; i < stringSequence.length()-1; i++) {
+            bookStart = String.valueOf(stringSequence.charAt(i));
+        //  Если Начало\конец книги совпадает с i символом строки, то строка = тому, что находится между началом и концом
+            if (bookEnd.equals(bookStart)) {
+                String uniqe = "";
+                String str = stringSequence.substring(i+1 , l);
+                int endIndex = str.indexOf(bookEnd);
+                String str1 = str.substring(0, endIndex);
+                // Подсчёт уникальных символов
+                for (int j = 0 ; j<str1.length(); j++) {
+                    if (uniqe.contains(String.valueOf(str1.charAt(j))))
+                        k -= 1;
+                    uniqe += str1.charAt(j);
+                    k += 1;
+                }
+                // Чтобы конец первой книги не оказался началом второй
+                i += endIndex+1;
+                }
+          }
+        return k;}
+}
+
