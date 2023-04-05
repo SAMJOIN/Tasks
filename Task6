@@ -1,0 +1,269 @@
+package com.company;
+
+import java.util.Arrays;
+import java.util.HashMap;
+
+public class Main {
+
+    public static void main(String[] args) {
+        System.out.println("Число белла для n элементов: " + bell(5));
+        System.out.println("Перевод слова на свинский латинский: " + translateWord("cram"));
+        System.out.println("Формат верный? " + validColor("rgb(1,256,5.222)"));
+        System.out.println("URL: " + stripUrlParams("https://edabit.com?a=1&b=2&a=2&a=3&b=3&c=2", new String[]{"b"}));
+        System.out.println("Самые длинные слова: "+getHashTags("How the Avocado Became the Fruit of the Global Trade"));
+        System.out.println(ulam(9));
+        System.out.println("Самая длинная неповторяющаяся последовательность: " + longestNonrepeatSubstring("abcdeeee"));
+        System.out.println("Римское число: " + convertRoman(3999));
+        System.out.println("Формула верна? " + formula("2*8=16=10+6=32/2"));
+        System.out.println("Число полиндром или его потомок? " + palindromedescendant(363));
+    }
+
+    // Задание 1
+    public static int bell(int n) {
+        int last = 1;
+        if (n == 0)
+            last = 1;
+        else {
+            int[][] arr = new int[n][n];
+            arr[0][0] = 1;
+            for (int i = 1; i < n; i++)
+                arr[0][i] = 0;
+            for (int i = 1; i < n; i++) {
+                arr[i][0] = last;
+                for (int j = 1; j < n; j++) {
+                    if (arr[i - 1][j - 1] != 0) {
+                        arr[i][j] = arr[i - 1][j - 1] + arr[i][j - 1];
+                        last = arr[i][j];
+                    } else
+                        arr[i][j] = 0;
+                }
+            }
+        }
+        return last;
+    }
+
+    //Задание 2
+    public static String translateWord(String str) {
+        String translate = "";
+        if (String.valueOf(str.charAt(0)).matches("[E,e,Y,y,U,u,O,o,A,a]"))
+            translate = str + "yay";
+        else {
+            int i = 0;
+            int count = 0;
+            String replace = "";
+            while (String.valueOf(str.charAt(i)).matches("[Q,q,W,w,R,r,T,t,P,p,S,s,D,d,F,f,G,g,H,h,J,j,K,k,L,l,Z,z,X,x,C,c,V,v,B,b,N,n,M,m]")) {
+                replace += str.charAt(i);
+                i += 1;
+            }
+            translate = str.substring(i, str.length()) + replace + "ay";
+        }
+        return translate;
+    }
+
+    //Задание 3
+    public static boolean validColor(String color) {
+        boolean x = true;
+        String num = color.substring(color.indexOf("(") + 1, color.indexOf(")"));
+        String[] index = num.split(",");
+        for (int i = 0; i < 3; i++) {
+            if (Double.parseDouble(index[i]) > 255 || Double.parseDouble(index[i]) < 0)
+                x = false;
+        }
+        return x;
+    }
+
+    //Задание 4
+    public static String stripUrlParams(String URL, String[] paramsToStrip) {
+        if (!URL.contains("?"))
+            return URL;
+        String[] adres = URL.split("\\?");
+        String[] params = adres[1].split("&");
+        // Используем HashMap, чтобы параметры с одинаковым названием не повторялись при выводе
+        HashMap<String, String> H = new HashMap<>();
+        //Заполнение HashMap параметрами
+        for (String param : params) {
+            H.put(param.substring(0, 1), param);
+        }
+        // Если paramsToStrip задан, то удаляем параметр
+        if (paramsToStrip != null)
+            for (String s : paramsToStrip) {
+                H.remove(s);
+            }
+        return adres[0] + "?" + String.join("&", H.values());
+    }
+
+    //Задание 5
+    public static String getHashTags(String str) {
+        // Удаление знаков препинания и разделение слов по пробелам
+        String [] s = str.replaceAll("\\p{Punct}", "").split(" ");
+        boolean needIteration = true;
+        // Сортируем массив по длине слова
+        while (needIteration) {
+            needIteration = false;
+            for (int i = 1; i < s.length; i++) {
+                if (s[i].length() > s[i - 1].length()) {
+                    String tmp = s[i];
+                    s[i] = s[i-1];
+                    s[i-1] = tmp;
+                    needIteration = true;
+                }
+            }
+        }
+        String[] max = new String[3];
+        max[0]="#"+s[0];
+        max[1]="#"+s[1];
+        max[2]="#"+s[2];
+
+    return Arrays.toString(max);}
+
+    //Задание 6
+    public static String ulam(int n) {
+        int[] ulam = new int[n];
+        ulam[0] = 1;
+        ulam[1] = 2;
+        ulam[2] = 3;
+        int min = 0;
+        String str = Integer.toString(ulam[0])+Integer.toString(ulam[1])+Integer.toString(ulam[2]);
+        for (int k = 3; k<n; k++) {
+            int count = 0;
+            min = ulam[k-1]+ulam[k-2];
+            int[] summ = new int[n*n];
+            for (int i = 0; i < k; i++) {
+                for (int j = i+1; j < k; j++) {
+                    int num = ulam[i] + ulam[j];
+                    summ[num]+=1;
+                    }
+            }
+            // что то не так с минимумом
+            for (int i = 0; i <summ.length; i++) {
+                if (summ[i] == 1 && i < min) {
+                    str += Integer.toString(i);
+                    ulam[k] = i;
+                }
+            }
+        }
+    return Arrays.toString(ulam);}
+
+    // Задание 7
+    public static String longestNonrepeatSubstring(String str) {
+        int max = 1;
+        String s = String.valueOf(str.charAt(0));
+        String add = String.valueOf(str.charAt(1));
+        int i = 1;
+        while (!s.contains(String.valueOf(str.charAt(i))) && i < str.length()-1) {
+            s += String.valueOf(str.charAt(i));
+            i += 1;
+        }
+        if (!s.contains(String.valueOf(str.charAt(str.length()-1))))
+            s += String.valueOf(str.charAt(str.length()-1));
+    return s;}
+
+    // Задание 8
+    public static String convertRoman(int num) {
+        String [] edin = new String[] {"I","II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
+        String fifty = "L";
+        String hundred = "C";
+        String fivehundred = "D";
+        String thousand = "M";
+        String output = "";
+        int l = Integer.toString(num).length();
+        int[] numID = new int[l];
+        int i = 0;
+        while (num != 0) {
+            numID[i] = num % 10;
+            num = num/10;
+            i+=1;
+        }
+        // Добавление разряда единиц
+        if (numID[0] != 0)
+            output += edin[numID[0]-1];
+        if (numID[1] != 0) {
+            if (numID[1]<4 )
+                output = edin[9].repeat(numID[1]) + output;
+            if (numID[1] >= 4 && numID[1] < 5)
+                output = edin[9] + fifty + output;
+            if (numID[1] >=5 && numID[1] < 9)
+                output = fifty + edin[9].repeat(numID[1]-5) + output;
+            if (numID[1]==9)
+                output = edin[9] + hundred + output;
+        }
+        // Добавление разряда десятков
+        if (numID[2] != 0) {
+            if (numID[2]<4 )
+                output = hundred.repeat(numID[2]) + output;
+            if (numID[2] >= 4 && numID[2] < 5)
+                output = hundred + fivehundred + output;
+            if (numID[2] >=5 && numID[2] < 9)
+                output = fivehundred + hundred.repeat(numID[2]-5) + output;
+            if (numID[2]==9)
+                output = hundred + thousand + output;
+        }
+        // Добавление разряда тысяч
+        if (numID[3] != 0) {
+            if (numID[3]<4 )
+                output = thousand.repeat(numID[3]) + output;
+        }
+    return output;}
+
+    // Задание 9
+    public static boolean formula(String formula) {
+        String [] part = formula.split("=");
+        String [] rez = new String[part.length];
+        // Расчёт значений каждых частей
+        for(int i = 0; i < part.length; i++) {
+            rez[i] = part[i];
+            if (part[i].contains("*")) {
+                int a = Integer.parseInt(part[i].substring(0, part[i].indexOf("*")));
+                int b = Integer.parseInt(part[i].substring(part[i].indexOf("*")+1));
+                rez[i] = Integer.toString(a*b);
+            }
+            if (part[i].contains("+")) {
+                int a = Integer.parseInt(part[i].substring(0, part[i].indexOf("+")));
+                int b = Integer.parseInt(part[i].substring(part[i].indexOf("+")+1));
+                rez[i] = Integer.toString(a+b);
+            }
+            if (part[i].contains("/")) {
+                int a = Integer.parseInt(part[i].substring(0, part[i].indexOf("/")));
+                int b = Integer.parseInt(part[i].substring(part[i].indexOf("/")+1));
+                rez[i] = Integer.toString(a/b);
+            }
+            if (part[i].contains("-")) {
+                int a = Integer.parseInt(part[i].substring(0, part[i].indexOf("-")));
+                int b = Integer.parseInt(part[i].substring(part[i].indexOf("-")+1));
+                rez[i] = Integer.toString(a-b);
+            }
+        }
+        boolean x = true;
+        // Проверка на совпадение значений каждых частей
+        for (int i = 0; i < rez.length-1; i++) {
+            for (int j = i+1; j < rez.length ;j++) {
+                if (!rez[i].equals(rez[j]))
+                    x = false;
+            }
+        }
+    return x;}
+
+    // Задание 10
+    public static boolean palindromedescendant(int num) {
+        int l = Integer.toString(num).length();
+        int[] pair = new int[l];
+        int i = 0;
+        while (num != 0) {
+            pair[i] = num % 10;
+            num = num / 10;
+            i += 1;
+        }
+        boolean x = true;
+        for (int j = 0; j < l/2; j++) {
+            if (pair[j] != pair[l-1-j]) {
+                x = false;
+            }
+        }
+        boolean y = true;
+        for (int j = 0; j < pair.length/2; j++){
+            if (pair[j]+pair[j+1] != pair[l-1-j]+pair[l-2-j])
+                y = false;
+            j += 1;
+        }
+    return x||y;}
+}
